@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Reservation System</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f4f4;
+    margin:0;
+}
+
+.container{
+    width:900px;
+    margin:30px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+}
+
+h1{
+    text-align:center;
+    color:#0066cc;
+}
+
+select,input{
+    padding:10px;
+    margin:8px;
+    width:200px;
+}
+
+button{
+    padding:10px 20px;
+    background:#0066cc;
+    color:white;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+button:hover{
+    background:#004b99;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+table,th,td{
+    border:1px solid #ccc;
+}
+
+th{
+    background:#0066cc;
+    color:white;
+}
+
+th,td{
+    padding:10px;
+    text-align:center;
+}
+
+#bookingDetails{
+    margin-top:20px;
+    background:#eef;
+    padding:15px;
+    border-radius:5px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Hotel Reservation System</h1>
+
+<input type="text" id="customer" placeholder="Customer Name">
+
+<select id="category">
+<option>Standard</option>
+<option>Deluxe</option>
+<option>Suite</option>
+</select>
+
+<button onclick="searchRooms()">Search Rooms</button>
+
+<div id="rooms"></div>
+
+<div id="bookingDetails"></div>
+
+</div>
+
+<script>
+
+class Hotel{
+
+constructor(){
+
+this.rooms=[
+{room:101,type:"Standard",price:1000,available:true},
+{room:102,type:"Standard",price:1000,available:true},
+{room:201,type:"Deluxe",price:2000,available:true},
+{room:202,type:"Deluxe",price:2000,available:true},
+{room:301,type:"Suite",price:3500,available:true}
+];
+
+this.bookings=
+JSON.parse(localStorage.getItem("bookings"))||[];
+
+this.bookings.forEach(b=>{
+let r=this.rooms.find(x=>x.room==b.room);
+if(r) r.available=false;
+});
+
+}
+
+save(){
+localStorage.setItem("bookings",
+JSON.stringify(this.bookings));
+}
+
+search(type){
+
+return this.rooms.filter(r=>
+r.type==type && r.available);
+
+}
+
+book(roomNo,name){
+
+let room=this.rooms.find(r=>r.room==roomNo);
+
+if(!room.available){
+alert("Room already booked");
+return;
+}
+
+if(name==""){
+alert("Enter customer name");
+return;
+}
+
+room.available=false;
+
+let booking={
+customer:name,
+room:room.room,
+type:room.type,
+price:room.price,
+payment:"Paid"
+};
+
+this.bookings.push(booking);
+
+this.save();
+
+alert("Payment Successful!\nBooking Confirmed.");
+
+displayBookings();
+
+}
+
+cancel(roomNo){
+
+let index=this.bookings.findIndex(
+b=>b.room==roomNo);
+
+if(index==-1){
+alert("Booking not found");
+return;
+}
+
+this.bookings.splice(index,1);
+
+let room=this.rooms.find(r=>r.room==roomNo);
+room.available=true;
+
+this.save();
+
+alert("Booking Cancelled");
+
+displayBookings();
+
+}
+
+}
+
+const hotel=new Hotel();
+
+function searchRooms(){
+
+let type=document.getElementById("category").value;
+
+let data=hotel.search(type);
+
+let html="<h3>Available Rooms</h3>";
+
+if(data.length==0){
+html+="No Rooms Available";
+}
+else{
+
+html+="<table>";
+html+="<tr><th>Room</th><th>Category</th><th>Price</th><th>Action</th></tr>";
+
+data.forEach(r=>{
+
+html+=`
+<tr>
+<td>${r.room}</td>
+<td>${r.type}</td>
+<td>₹${r.price}</td>
+<td>
+<button onclick="hotel.book(${r.room},
+document.getElementById('customer').value)">
+Book
+</button>
+</td>
+</tr>
+`;
+
+});
+
+html+="</table>";
+
+}
+
+document.getElementById("rooms").innerHTML=html;
+
+}
+
+function displayBookings(){
+
+let html="<h3>Booking Details</h3>";
+
+if(hotel.bookings.length==0){
+
+html+="No Bookings";
+
+}
+else{
+
+html+="<table>";
+html+="<tr><th>Name</th><th>Room</th><th>Category</th><th>Payment</th><th>Cancel</th></tr>";
+
+hotel.bookings.forEach(b=>{
+
+html+=`
+<tr>
+<td>${b.customer}</td>
+<td>${b.room}</td>
+<td>${b.type}</td>
+<td>${b.payment}</td>
+<td>
+<button onclick="hotel.cancel(${b.room})">
+Cancel
+</button>
+</td>
+</tr>
+`;
+
+});
+
+html+="</table>";
+
+}
+
+document.getElementById("bookingDetails").innerHTML=html;
+
+}
+
+displayBookings();
+
+</script>
+
+</body>
+</html>

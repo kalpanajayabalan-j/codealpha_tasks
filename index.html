@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Grade Management</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+      }
+
+      .container {
+        width: 700px;
+        margin: 40px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px gray;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      input {
+        width: 45%;
+        padding: 10px;
+        margin: 10px 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #218838;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #ccc;
+      }
+
+      th {
+        background: #28a745;
+        color: white;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+      }
+
+      .summary {
+        margin-top: 20px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Student Grade Management System</h1>
+
+      <input type="text" id="name" placeholder="Enter Student Name" />
+      <input type="number" id="grade" placeholder="Enter Grade" />
+
+      <button onclick="addStudent()">Add Student</button>
+
+      <table id="studentTable">
+        <tr>
+          <th>Student Name</th>
+          <th>Grade</th>
+        </tr>
+      </table>
+
+      <div class="summary">
+        <p id="average"></p>
+        <p id="highest"></p>
+        <p id="lowest"></p>
+      </div>
+    </div>
+
+    <script>
+      let students = [];
+
+      function addStudent() {
+        let name = document.getElementById("name").value;
+        let grade = parseFloat(document.getElementById("grade").value);
+
+        if (name == "" || isNaN(grade)) {
+          alert("Please enter valid details.");
+          return;
+        }
+
+        students.push({ name: name, grade: grade });
+
+        displayTable();
+
+        document.getElementById("name").value = "";
+        document.getElementById("grade").value = "";
+      }
+
+      function displayTable() {
+        let table = document.getElementById("studentTable");
+
+        table.innerHTML = "<tr><th>Student Name</th><th>Grade</th></tr>";
+
+        let total = 0;
+
+        let highest = students[0];
+        let lowest = students[0];
+
+        students.forEach(function (student) {
+          table.innerHTML += `
+<tr>
+<td>${student.name}</td>
+<td>${student.grade}</td>
+</tr>
+`;
+
+          total += student.grade;
+
+          if (student.grade > highest.grade) highest = student;
+
+          if (student.grade < lowest.grade) lowest = student;
+        });
+
+        let average = total / students.length;
+
+        document.getElementById("average").innerHTML =
+          "<b>Average Score:</b> " + average.toFixed(2);
+
+        document.getElementById("highest").innerHTML =
+          "<b>Highest Score:</b> " + highest.grade + " (" + highest.name + ")";
+
+        document.getElementById("lowest").innerHTML =
+          "<b>Lowest Score:</b> " + lowest.grade + " (" + lowest.name + ")";
+      }
+    </script>
+  </body>
+</html>

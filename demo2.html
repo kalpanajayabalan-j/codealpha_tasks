@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chatbot</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+      }
+
+      .container {
+        width: 400px;
+        margin: 30px auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px gray;
+      }
+
+      h2 {
+        margin: 0;
+        padding: 15px;
+        background: #007bff;
+        color: white;
+        text-align: center;
+      }
+
+      #chatBox {
+        height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .user {
+        text-align: right;
+        margin: 8px;
+        color: blue;
+      }
+
+      .bot {
+        text-align: left;
+        margin: 8px;
+        color: green;
+      }
+
+      .inputArea {
+        display: flex;
+      }
+
+      input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        outline: none;
+      }
+
+      button {
+        width: 80px;
+        border: none;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>AI Chatbot</h2>
+
+      <div id="chatBox"></div>
+
+      <div class="inputArea">
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <script>
+      class ChatBot {
+        constructor() {
+          this.answers = {
+            hello: "Hello! How can I help you?",
+
+            hi: "Hi! Welcome.",
+
+            "how are you": "I'm doing great!",
+
+            "your name": "I'm an AI Chatbot.",
+
+            java: "Java is an object-oriented programming language.",
+
+            html: "HTML is used to create web pages.",
+
+            css: "CSS is used for styling web pages.",
+
+            javascript: "JavaScript adds interactivity to web pages.",
+
+            ai: "Artificial Intelligence enables machines to think and learn.",
+
+            nlp: "Natural Language Processing helps computers understand human language.",
+
+            bye: "Goodbye! Have a nice day.",
+          };
+        }
+
+        reply(message) {
+          message = message.toLowerCase();
+
+          for (let key in this.answers) {
+            if (message.includes(key)) {
+              return this.answers[key];
+            }
+          }
+
+          return "Sorry, I don't understand. Please ask another question.";
+        }
+
+        train(question, answer) {
+          this.answers[question.toLowerCase()] = answer;
+        }
+      }
+
+      const bot = new ChatBot();
+
+      // Example Training
+      bot.train("college", "Our college provides quality education.");
+      bot.train("project", "This is a simple AI Chatbot project.");
+
+      function sendMessage() {
+        let input = document.getElementById("userInput");
+
+        let text = input.value.trim();
+
+        if (text === "") return;
+
+        let chat = document.getElementById("chatBox");
+
+        chat.innerHTML += "<div class='user'><b>You:</b> " + text + "</div>";
+
+        let response = bot.reply(text);
+
+        setTimeout(function () {
+          chat.innerHTML +=
+            "<div class='bot'><b>Bot:</b> " + response + "</div>";
+
+          chat.scrollTop = chat.scrollHeight;
+        }, 500);
+
+        input.value = "";
+
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      document
+        .getElementById("userInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        });
+    </script>
+  </body>
+</html>
