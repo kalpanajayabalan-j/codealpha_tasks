@@ -1,281 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hotel Reservation System</title>
+    <title>Simple To-Do List</title>
 
-<style>
-body{
-    font-family:Arial,sans-serif;
-    background:#f4f4f4;
-    margin:0;
-}
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+        }
 
-.container{
-    width:900px;
-    margin:30px auto;
-    background:#fff;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px gray;
-}
+        .box {
+            width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
 
-h1{
-    text-align:center;
-    color:#0066cc;
-}
+        input {
+            padding: 10px;
+            width: 60%;
+        }
 
-select,input{
-    padding:10px;
-    margin:8px;
-    width:200px;
-}
+        button {
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
 
-button{
-    padding:10px 20px;
-    background:#0066cc;
-    color:white;
-    border:none;
-    cursor:pointer;
-    border-radius:5px;
-}
+        li {
+            list-style: none;
+            padding: 10px;
+            margin: 5px;
+            background: #eee;
+        }
 
-button:hover{
-    background:#004b99;
-}
-
-table{
-    width:100%;
-    margin-top:20px;
-    border-collapse:collapse;
-}
-
-table,th,td{
-    border:1px solid #ccc;
-}
-
-th{
-    background:#0066cc;
-    color:white;
-}
-
-th,td{
-    padding:10px;
-    text-align:center;
-}
-
-#bookingDetails{
-    margin-top:20px;
-    background:#eef;
-    padding:15px;
-    border-radius:5px;
-}
-</style>
-
+        .done {
+            text-decoration: line-through;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
+<div class="box">
+    <h2>To-Do List</h2>
 
-<h1>Hotel Reservation System</h1>
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <button onclick="addTask()">Add</button>
 
-<input type="text" id="customer" placeholder="Customer Name">
+    <br>
 
-<select id="category">
-<option>Standard</option>
-<option>Deluxe</option>
-<option>Suite</option>
-</select>
+    <button onclick="showAll()">All</button>
+    <button onclick="showActive()">Active</button>
+    <button onclick="showCompleted()">Completed</button>
 
-<button onclick="searchRooms()">Search Rooms</button>
-
-<div id="rooms"></div>
-
-<div id="bookingDetails"></div>
-
+    <ul id="taskList"></ul>
 </div>
 
 <script>
 
-class Hotel{
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-constructor(){
+function displayTasks(list = tasks) {
 
-this.rooms=[
-{room:101,type:"Standard",price:1000,available:true},
-{room:102,type:"Standard",price:1000,available:true},
-{room:201,type:"Deluxe",price:2000,available:true},
-{room:202,type:"Deluxe",price:2000,available:true},
-{room:301,type:"Suite",price:3500,available:true}
-];
+    let taskList = document.getElementById("taskList");
 
-this.bookings=
-JSON.parse(localStorage.getItem("bookings"))||[];
+    taskList.innerHTML = "";
 
-this.bookings.forEach(b=>{
-let r=this.rooms.find(x=>x.room==b.room);
-if(r) r.available=false;
-});
+    list.forEach((task, index) => {
 
+        let li = document.createElement("li");
+
+        if (task.completed) {
+            li.classList.add("done");
+        }
+
+        li.innerHTML = `
+            ${task.name}
+            <br>
+            <button onclick="completeTask(${index})">Done</button>
+            <button onclick="editTask(${index})">Edit</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+        `;
+
+        taskList.appendChild(li);
+    });
 }
 
-save(){
-localStorage.setItem("bookings",
-JSON.stringify(this.bookings));
+function addTask() {
+
+    let input = document.getElementById("taskInput");
+
+    if (input.value == "") {
+        alert("Enter a task");
+        return;
+    }
+
+    tasks.push({
+        name: input.value,
+        completed: false
+    });
+
+    input.value = "";
+
+    saveTasks();
+    displayTasks();
 }
 
-search(type){
+function completeTask(index) {
 
-return this.rooms.filter(r=>
-r.type==type && r.available);
+    tasks[index].completed = !tasks[index].completed;
 
+    saveTasks();
+    displayTasks();
 }
 
-book(roomNo,name){
+function editTask(index) {
 
-let room=this.rooms.find(r=>r.room==roomNo);
+    let newTask = prompt("Edit task:", tasks[index].name);
 
-if(!room.available){
-alert("Room already booked");
-return;
+    if (newTask != null && newTask != "") {
+        tasks[index].name = newTask;
+    }
+
+    saveTasks();
+    displayTasks();
 }
 
-if(name==""){
-alert("Enter customer name");
-return;
+function deleteTask(index) {
+
+    tasks.splice(index, 1);
+
+    saveTasks();
+    displayTasks();
 }
 
-room.available=false;
-
-let booking={
-customer:name,
-room:room.room,
-type:room.type,
-price:room.price,
-payment:"Paid"
-};
-
-this.bookings.push(booking);
-
-this.save();
-
-alert("Payment Successful!\nBooking Confirmed.");
-
-displayBookings();
-
+function showAll() {
+    displayTasks(tasks);
 }
 
-cancel(roomNo){
+function showActive() {
 
-let index=this.bookings.findIndex(
-b=>b.room==roomNo);
+    let active = tasks.filter(task => task.completed == false);
 
-if(index==-1){
-alert("Booking not found");
-return;
+    displayTasks(active);
 }
 
-this.bookings.splice(index,1);
+function showCompleted() {
 
-let room=this.rooms.find(r=>r.room==roomNo);
-room.available=true;
+    let completed = tasks.filter(task => task.completed == true);
 
-this.save();
-
-alert("Booking Cancelled");
-
-displayBookings();
-
+    displayTasks(completed);
 }
 
+function saveTasks() {
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-const hotel=new Hotel();
-
-function searchRooms(){
-
-let type=document.getElementById("category").value;
-
-let data=hotel.search(type);
-
-let html="<h3>Available Rooms</h3>";
-
-if(data.length==0){
-html+="No Rooms Available";
-}
-else{
-
-html+="<table>";
-html+="<tr><th>Room</th><th>Category</th><th>Price</th><th>Action</th></tr>";
-
-data.forEach(r=>{
-
-html+=`
-<tr>
-<td>${r.room}</td>
-<td>${r.type}</td>
-<td>₹${r.price}</td>
-<td>
-<button onclick="hotel.book(${r.room},
-document.getElementById('customer').value)">
-Book
-</button>
-</td>
-</tr>
-`;
-
-});
-
-html+="</table>";
-
-}
-
-document.getElementById("rooms").innerHTML=html;
-
-}
-
-function displayBookings(){
-
-let html="<h3>Booking Details</h3>";
-
-if(hotel.bookings.length==0){
-
-html+="No Bookings";
-
-}
-else{
-
-html+="<table>";
-html+="<tr><th>Name</th><th>Room</th><th>Category</th><th>Payment</th><th>Cancel</th></tr>";
-
-hotel.bookings.forEach(b=>{
-
-html+=`
-<tr>
-<td>${b.customer}</td>
-<td>${b.room}</td>
-<td>${b.type}</td>
-<td>${b.payment}</td>
-<td>
-<button onclick="hotel.cancel(${b.room})">
-Cancel
-</button>
-</td>
-</tr>
-`;
-
-});
-
-html+="</table>";
-
-}
-
-document.getElementById("bookingDetails").innerHTML=html;
-
-}
-
-displayBookings();
+displayTasks();
 
 </script>
 
